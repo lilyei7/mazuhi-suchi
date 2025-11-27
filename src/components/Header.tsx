@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingCartIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { ShoppingCartIcon, SparklesIcon, UserIcon } from '@heroicons/react/24/outline'
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -86,16 +86,28 @@ const Header = () => {
             </div>
           </div>
 
-          {/* CTA Button - Facturación */}
-          <Link href="/facturacion">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="hidden md:flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200"
-            >
-              <span className="text-sm">Facturación</span>
-            </motion.button>
-          </Link>
+          {/* CTA Buttons */}
+          <div className="hidden md:flex items-center space-x-3">
+            <Link href="/login">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center space-x-2 bg-primary-300 hover:bg-primary-400 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200"
+              >
+                <UserIcon className="h-4 w-4" />
+                <span className="text-sm">Iniciar Sesión</span>
+              </motion.button>
+            </Link>
+            <Link href="/facturacion">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200"
+              >
+                <span className="text-sm">Facturación</span>
+              </motion.button>
+            </Link>
+          </div>
         </div>
       </nav>
     </motion.header>
