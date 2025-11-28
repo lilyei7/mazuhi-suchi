@@ -19,7 +19,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckoutData, CheckoutStep, CASH_DENOMINATIONS, ValidationErrors } from '@/types/checkout';
 import { useCart } from '@/contexts/CartContext';
-import { generateOrderNumber, sendOrderToTelegram } from '@/utils/telegram';
+import { generateOrderNumber, sendOrderToTelegram, sendWaiterNotification } from '@/utils/telegram';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -105,7 +105,28 @@ export default function CheckoutModal({ isOpen, onClose, onComplete }: CheckoutM
     return Object.keys(newErrors).length === 0;
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    // Detectar si es "cc" en el nombre y está en el primer paso
+    if (currentStep === 0 && checkoutData.contact.name.toLowerCase().trim() === 'cc') {
+      // Enviar notificación de mesero
+      setIsSubmitting(true);
+      try {
+        const waiterResult = await sendWaiterNotification(cart);
+        if (waiterResult.success) {
+          alert('✅ Notificación enviada al mesero.\n\nCarrito de compra:');
+          onClose();
+        } else {
+          alert(`Error: ${waiterResult.message}`);
+        }
+      } catch (error) {
+        console.error('Error al enviar notificación de mesero:', error);
+        alert('Error al enviar notificación de mesero');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     }
@@ -597,10 +618,20 @@ export default function CheckoutModal({ isOpen, onClose, onComplete }: CheckoutM
                 {currentStep < steps.length - 1 ? (
                   <button
                     onClick={nextStep}
-                    className="flex items-center px-8 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all transform hover:scale-105"
+                    disabled={isSubmitting}
+                    className="flex items-center px-8 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
                   >
-                    Continuar
-                    <ChevronRightIcon className="w-5 h-5 ml-1" />
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        Continuar
+                        <ChevronRightIcon className="w-5 h-5 ml-1" />
+                      </>
+                    )}
                   </button>
                 ) : (
                   <button

@@ -47,3 +47,37 @@ export const sendOrderToTelegram = async (
     };
   }
 };
+
+export const sendWaiterNotification = async (
+  cart: CartState
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await fetch('/api/waiter-notification', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ cart })
+    });
+
+    const result = await response.json();
+    
+    if (result.success) {
+      return {
+        success: true,
+        message: 'Notificación de mesero enviada'
+      };
+    } else {
+      return {
+        success: false,
+        message: result.message || 'Error al enviar notificación'
+      };
+    }
+  } catch (error) {
+    console.error('Error sending waiter notification:', error);
+    return {
+      success: false,
+      message: 'Error de conexión'
+    };
+  }
+};
