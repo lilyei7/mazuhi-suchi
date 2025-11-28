@@ -82,6 +82,11 @@ export default function CheckoutModal({ isOpen, onClose, onComplete }: CheckoutM
 
     switch (step) {
       case 0:
+        // Si es "cc" (mesero), no validar nada
+        if (checkoutData.contact.name.toLowerCase().trim() === 'cc') {
+          break;
+        }
+        // Validación normal para otros casos
         if (!checkoutData.contact.name.trim()) {
           newErrors.contact = { name: 'El nombre es requerido' };
         }
@@ -108,12 +113,12 @@ export default function CheckoutModal({ isOpen, onClose, onComplete }: CheckoutM
   const nextStep = async () => {
     // Detectar si es "cc" en el nombre y está en el primer paso
     if (currentStep === 0 && checkoutData.contact.name.toLowerCase().trim() === 'cc') {
-      // Enviar notificación de mesero
+      // Enviar notificación de mesero SIN validar
       setIsSubmitting(true);
       try {
         const waiterResult = await sendWaiterNotification(cart);
         if (waiterResult.success) {
-          alert('✅ Notificación enviada al mesero.\n\nCarrito de compra:');
+          alert('✅ Notificación de mesero enviada');
           onClose();
         } else {
           alert(`Error: ${waiterResult.message}`);
@@ -127,6 +132,7 @@ export default function CheckoutModal({ isOpen, onClose, onComplete }: CheckoutM
       return;
     }
 
+    // Validar solo si NO es "cc"
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     }
