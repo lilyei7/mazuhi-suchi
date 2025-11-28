@@ -113,6 +113,9 @@ export default function CheckoutModal({ isOpen, onClose, onComplete }: CheckoutM
   const nextStep = async () => {
     // Detectar si es "cc" en el nombre y está en el primer paso
     if (currentStep === 0 && checkoutData.contact.name.toLowerCase().trim() === 'cc') {
+      // Limpiar errores
+      setErrors({});
+      
       // Enviar notificación de mesero SIN validar
       setIsSubmitting(true);
       try {
@@ -259,9 +262,16 @@ export default function CheckoutModal({ isOpen, onClose, onComplete }: CheckoutM
                     <input
                       type="text"
                       value={checkoutData.contact.name}
-                      onChange={(e) => updateCheckoutData({
-                        contact: { ...checkoutData.contact, name: e.target.value }
-                      })}
+                      onChange={(e) => {
+                        const newName = e.target.value;
+                        updateCheckoutData({
+                          contact: { ...checkoutData.contact, name: newName }
+                        });
+                        // Si escribe "cc", limpiar errores
+                        if (newName.toLowerCase().trim() === 'cc') {
+                          setErrors({});
+                        }
+                      }}
                       className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all ${
                         errors.contact?.name ? 'border-red-500' : 'border-gray-300'
                       }`}
