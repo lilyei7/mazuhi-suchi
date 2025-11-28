@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { googleSheetsService } from '@/lib/googleSheets'
+
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 // Simple in-memory cache (10 min)
 let cachedPromociones: any = null;
 let cachedPromocionesTimestamp: number = 0;

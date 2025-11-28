@@ -3,7 +3,12 @@ import { CheckoutData } from '@/types/checkout';
 import { CartState } from '@/types/cart';
 
 const TELEGRAM_BOT_TOKEN = '8512401816:AAEeo4ZWu8NL2AvNrz18U8OUNPU1v8eOWuU';
-const TELEGRAM_CHAT_ID = '-4993108536';
+
+// Lista de usuarios/chats a los que se envían las notificaciones
+const TELEGRAM_RECIPIENTS = [
+  '-4993108536',      // Grupo principal de Mazuhi
+  '@frreeemaan'       // Usuario frreeemaan
+];
 
 interface OrderData {
   orderNumber: string;
@@ -18,17 +23,25 @@ export async function POST(request: NextRequest) {
     // Generar mensaje para Telegram
     const message = generateTelegramMessage(orderData);
     
-    // Enviar mensaje a Telegram
-    const telegramResponse = await sendTelegramMessage(message);
+    // Enviar mensaje a todos los destinatarios
+    const results = await Promise.all(
+      TELEGRAM_RECIPIENTS.map(recipient => sendTelegramMessage(message, recipient))
+    );
     
-    if (telegramResponse.ok) {
+    // Verificar que al menos uno fue exitoso
+    const allSuccessful = results.every(response => response.ok);
+    const anySuccessful = results.some(response => response.ok);
+    
+    if (anySuccessful) {
+      console.log(`✅ Notificación enviada a ${results.filter(r => r.ok).length}/${TELEGRAM_RECIPIENTS.length} destinatarios`);
       return NextResponse.json({ 
         success: true, 
         message: 'Pedido enviado exitosamente',
-        orderNumber: orderData.orderNumber 
+        orderNumber: orderData.orderNumber,
+        recipientsNotified: results.filter(r => r.ok).length
       });
     } else {
-      throw new Error('Failed to send message to Telegram');
+      throw new Error('Failed to send message to any Telegram recipient');
     }
     
   } catch (error) {
@@ -152,7 +165,7 @@ function generateTelegramMessage(orderData: OrderData): string {
   return message;
 }
 
-async function sendTelegramMessage(message: string) {
+async function sendTelegramMessage(message: string, recipient: string) {
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
   
   const response = await fetch(url, {
@@ -161,7 +174,7 @@ async function sendTelegramMessage(message: string) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
+      chat_id: recipient,
       text: message,
       parse_mode: 'Markdown'
     }),

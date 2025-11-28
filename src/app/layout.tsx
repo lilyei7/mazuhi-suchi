@@ -5,6 +5,7 @@ import { CartProvider } from '@/contexts/CartContext'
 import CartSidebar from '@/components/CartSidebar'
 import CartFloatingButton from '@/components/CartFloatingButton'
 import BottomNavigation from '@/components/BottomNavigation'
+import ServiceWorker from '@/components/ServiceWorker'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -103,6 +104,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} ${teko.variable} antialiased`}>
         <CartProvider>
+          <ServiceWorker />
           {children}
           <CartSidebar />
           <CartFloatingButton />

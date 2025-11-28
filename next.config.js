@@ -33,7 +33,18 @@ const nextConfig = {
   // Compresión
   compress: true,
 
-  // Headers de cache
+  // Optimizaciones avanzadas de performance
+  poweredByHeader: false,
+  reactStrictMode: true,
+
+  // Optimización de bundle splitting
+  experimental: {
+    scrollRestoration: true,
+    optimizeCss: true,
+    webVitalsAttribution: ['CLS', 'LCP'],
+  },
+
+  // Headers de seguridad y performance
   async headers() {
     return [
       {
@@ -51,6 +62,10 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
         ],
       },
       {
@@ -64,6 +79,15 @@ const nextConfig = {
       },
       {
         source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/images/(.*)',
         headers: [
           {
             key: 'Cache-Control',
